@@ -2,7 +2,7 @@
 import SettingsPanel from "@/components/SettingsPanel";
 import { SurahSidebar } from "@/components/SurahSidebar";
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export default function QuranApp() {
   const [rightOpen, setRightOpen] = useState(true);
@@ -10,19 +10,55 @@ export default function QuranApp() {
   const [transSize, setTransSize] = useState(19);
   const [surahs, setSurahs] = useState([]);
   const [selectedSurah, setSelectedSurah] = useState(null);
-  const params = useParams();
-  const slug = params.slug;
+  const [loading, setLoading] = useState(false);
+  const { slug } = useParams();
 
-  // Persistence: Load settings from localStorage
+  // Load Settings & Fetch Sidebar List
   useEffect(() => {
     const savedArabic = localStorage.getItem("arabicSize");
     if (savedArabic) setArabicSize(parseInt(savedArabic));
 
-    // Fetch Surah List
     fetch("https://api.alquran.cloud/v1/surah")
       .then((res) => res.json())
       .then((data) => setSurahs(data.data));
   }, []);
+
+  // Define fetchSurah with useCallback to prevent unnecessary re-renders
+  const fetchSurah = useCallback(async (id) => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const [arabicRes, transRes] = await Promise.all([
+        fetch(`https://api.alquran.cloud/v1/surah/${id}`),
+        fetch(`https://api.alquran.cloud/v1/surah/${id}/en.sahih`),
+      ]);
+
+      const arabicResponse = await arabicRes.json();
+      const transResponse = await transRes.json();
+
+      const combined = {
+        ...arabicResponse.data,
+        verses: arabicResponse.data.ayahs.map((ayah, index) => ({
+          ...ayah,
+          translation: transResponse.data.ayahs[index].text,
+        })),
+      };
+
+      setSelectedSurah(combined);
+    } catch (error) {
+      console.error("Error fetching Surah:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Trigger fetchSurah when slug changes or surah list is fetched
+  useEffect(() => {
+    if (surahs.length > 0) {
+      const targetId = slug || 1; // Default to Fatiha (1) if no slug
+      fetchSurah(targetId);
+    }
+  }, [slug, surahs, fetchSurah]);
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -32,36 +68,56 @@ export default function QuranApp() {
         slug={slug}
       />
 
-      <main className="flex-1 overflow-y-auto p-6">
-        {/* Ayah Rendering Logic here */}
+      <main className="flex-1 overflow-y-auto p-6 bg-background">
         <div className="max-w-3xl mx-auto">
-          <div className="mb-8 p-6 rounded-xl text-center border border-slate-700">
-            <h1 className="text-2xl font-bold">Surah Al-Fatiha</h1>
-            <p className="text-emerald-500">7 Verses • Meccan</p>
-          </div>
-
-          <div className="space-y-6">
-            {/* Example Ayah Row */}
-            <div className="p-6 border-b border-borderColor">
-              <div
-                className="text-right mb-4 leading-loose font-arabic"
-                style={{ fontSize: `${arabicSize}px` }}
-              >
-                بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-              </div>
-              <div
-                className="text-gray-400"
-                style={{ fontSize: `${transSize}px` }}
-              >
-                In the name of Allah, the Entirely Merciful, the Especially
-                Merciful.
-              </div>
+          {loading ? (
+            <div className="flex h-64 items-center justify-center text-emerald-500">
+              <span className="animate-pulse">Loading Surah...</span>
             </div>
-          </div>
+          ) : selectedSurah ? (
+            <>
+              <div className="mb-8 p-6 rounded-xl text-center border border-slate-700 bg-bgsecondary">
+                <h1 className="text-3xl font-bold mb-2">
+                  {selectedSurah.englishName}
+                </h1>
+                <p className="text-emerald-500">
+                  {selectedSurah.revelationType} • {selectedSurah.numberOfAyahs}{" "}
+                  Verses
+                </p>
+              </div>
+
+              <div className="space-y-8">
+                {selectedSurah.verses.map((ayah) => (
+                  <div
+                    key={ayah.number}
+                    className="p-6 border-b border-white/5 group"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">
+                        {selectedSurah.number}:{ayah.numberInSurah}
+                      </span>
+                      <div
+                        className="text-right leading-[2.5] font-arabic flex-1"
+                        style={{ fontSize: `${arabicSize}px` }}
+                        dir="rtl"
+                      >
+                        {ayah.text}
+                      </div>
+                    </div>
+                    <div
+                      className="text-slate-400 leading-relaxed"
+                      style={{ fontSize: `${transSize}px` }}
+                    >
+                      {ayah.translation}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
         </div>
       </main>
 
-      {/* Settings Panel */}
       <SettingsPanel
         isOpen={rightOpen}
         arabicSize={arabicSize}

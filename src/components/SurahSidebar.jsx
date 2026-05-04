@@ -63,6 +63,7 @@ export function SurahSidebar({ surahs, onSelect, slug }) {
             <Link
               key={s.number}
               href={`/${s.number}`}
+              onClick={() => onSelect(s.number)}
               className={`flex items-center p-4 rounded-xl cursor-pointer group border transition-all ${
                 slug.toString() === s.number.toString()
                   ? "bg-[#111510] border border-[#21331f]"
