@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function MainPage() {
   return (
     <div className="flex items-center justify-center h-full w-full">
