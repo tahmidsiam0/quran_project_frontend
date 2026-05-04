@@ -77,7 +77,7 @@ export default function QuranApp() {
           ) : selectedSurah ? (
             <>
               <div className="mb-8 p-6 rounded-xl text-center border border-slate-700 bg-bgsecondary">
-                <h1 className="text-3xl font-bold mb-2">
+                <h1 className="text-3xl font-bold mb-2 text-white">
                   {selectedSurah.englishName}
                 </h1>
                 <p className="text-emerald-500">
@@ -97,7 +97,7 @@ export default function QuranApp() {
                         {selectedSurah.number}:{ayah.numberInSurah}
                       </span>
                       <div
-                        className="text-right leading-[2.5] font-arabic flex-1"
+                        className="text-right leading-[2.5] font-arabic flex-1 text-white"
                         style={{ fontSize: `${arabicSize}px` }}
                         dir="rtl"
                       >

@@ -10,7 +10,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className="bg-[#0b1120] text-gray-100 overflow-hidden antialiased">
+      <body className="bg-[#0b1120] text-white overflow-hidden antialiased">
         <div className="flex h-screen w-full">
           {/* Left Icon Sidebar */}
           <IconSidebar />
