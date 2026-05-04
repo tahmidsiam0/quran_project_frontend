@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { useState } from "react";
 
-export function SurahSidebar({ surahs, onSelect, selectedId }) {
+export function SurahSidebar({ surahs, onSelect, slug }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter surahs based on search
@@ -11,18 +12,18 @@ export function SurahSidebar({ surahs, onSelect, selectedId }) {
   );
 
   return (
-    <aside className="w-85 border-r border-slate-800 flex flex-col h-screen bg-[#0b1120] text-gray-300">
+    <aside className="w-85 border-r border-borderColor flex flex-col h-screen text-gray-300">
       {/* FIXED HEADER SECTION */}
-      <div className="p-4 space-y-4 shadow-lg">
+      <div className="pt-6 pb-4 px-7 space-y-4 shadow-lg">
         {/* 3 Tabs */}
-        <div className="flex bg-[#1e293b]/50 rounded-full p-1 border border-slate-800">
-          <button className="flex-1 py-1.5 px-4 rounded-full bg-[#1e293b] text-white text-sm font-medium">
+        <div className="flex bg-bgmain rounded-full p-1 h-10">
+          <button className="flex-1 flex items-center justify-center rounded-full bg-bgsecondary text-white text-sm font-medium">
             Surah
           </button>
-          <button className="flex-1 py-1.5 px-4 rounded-full text-gray-500 text-sm">
+          <button className="flex-1 flex items-center justify-center rounded-full text-gray-500 text-sm">
             Juz
           </button>
-          <button className="flex-1 py-1.5 px-4 rounded-full text-gray-500 text-sm">
+          <button className="flex-1 flex items-center justify-center rounded-full text-gray-500 text-sm">
             Page
           </button>
         </div>
@@ -50,43 +51,49 @@ export function SurahSidebar({ surahs, onSelect, selectedId }) {
             placeholder="Search Surah"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#1e293b]/30 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 focus:outline-none focus:border-emerald-500/50 transition-colors"
+            className="w-full bg-[#1e293b]/30 border border-borderColor py-2.5 pl-10 pr-4 focus:outline-none focus:border-none transition-colors rounded-full h-10 placeholder:text-sm placeholder:text-gray-500/50"
           />
         </div>
       </div>
 
       {/* SCROLLABLE LIST SECTION */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar">
-        <div className="space-y-3">
+      <div className="flex-1 overflow-y-auto px-7 pb-4 custom-scrollbar">
+        <div className="space-y-2">
           {filteredSurahs.map((s) => (
-            <div
+            <Link
               key={s.number}
-              onClick={() => onSelect(s.number)}
-              className={`flex items-center p-4 rounded-2xl cursor-pointer border transition-all ${
-                selectedId === s.number
-                  ? "bg-[#1e293b]/80 border-emerald-500/50"
-                  : "bg-[#1e293b]/20 border-slate-800 hover:border-slate-700"
+              href={`/${s.number}`}
+              className={`flex items-center p-4 rounded-xl cursor-pointer group border transition-all ${
+                slug.toString() === s.number.toString()
+                  ? "bg-[#111510] border border-[#21331f]"
+                  : "bg-bgsecondary border-borderColor hover:border-[#21331f] hover:bg-[#111510]"
               }`}
             >
               {/* Diamond Number Shape */}
-              <div className="relative w-10 h-10 flex items-center justify-center mr-4">
-                <div className="absolute inset-0 bg-slate-800 rotate-45 rounded-md"></div>
+              <div className="relative w-8.5 h-8.5 flex items-center justify-center mr-4">
+                <div
+                  className={`absolute inset-0 rotate-45 rounded-md ${
+                    slug.toString() === s.number.toString()
+                      ? "bg-primary"
+                      : "bg-bgmain group-hover:bg-primary"
+                  }`}
+                ></div>
                 <span className="relative z-10 text-xs font-bold">
                   {s.number}
                 </span>
               </div>
 
               <div className="flex-1">
-                <p className="font-semibold text-[15px]">{s.englishName}</p>
+                <p className="font-medium text-[15px]">{s.englishName}</p>
                 <p className="text-gray-500 text-xs">
                   {s.englishNameTranslation}
                 </p>
               </div>
 
-              <div className="text-right text-xl font-arabic text-white/90">
+              <div className="text-right text-xs font-arabic text-white/90">
                 {s.name}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -1,20 +1,32 @@
+"use client";
+import React, { useRef } from "react";
+import Topbar from "../components/Topbar";
 import "./globals.css";
+import IconSidebar from "@/components/IconSidebar";
 
-export default function Layout({ children }) {
+// This is your Root Layout (app/layout.js)
+export default function RootLayout({ children }) {
+  const scrollRef = useRef(null);
+
   return (
-    <html>
-      <body className="font-arabic">
-        <div className="flex h-screen bg-[#0f172a] text-gray-100 overflow-hidden">
-          {/* 1. Left Icon Sidebar */}
-          <aside className="w-16 border-r border-slate-800 flex flex-col items-center py-4 space-y-8 bg-[#1e293b]">
-            <div className="text-emerald-500 font-bold text-xl">Q</div>
-            <button className="p-2 hover:bg-slate-700 rounded-lg">📖</button>
-            <button className="p-2 hover:bg-slate-700 rounded-lg">🔍</button>
-            <button className="p-2 hover:bg-slate-700 rounded-lg">⚙️</button>
-          </aside>
+    <html lang="en">
+      <body className="bg-[#0b1120] text-gray-100 overflow-hidden antialiased">
+        <div className="flex h-screen w-full">
+          {/* Left Icon Sidebar */}
+          <IconSidebar />
 
-          {/* Main Content Area */}
-          {children}
+          {/* Topbar */}
+          <Topbar scrollContainerRef={scrollRef} />
+
+          {/* Main Content Wrapper */}
+          <div
+            ref={scrollRef}
+            className="flex-1 flex flex-col overflow-y-auto custom-scrollbar relative pt-15"
+          >
+            <main className="flex-1 w-full flex bg-bgsecondary">
+              {children}
+            </main>
+          </div>
         </div>
       </body>
     </html>
